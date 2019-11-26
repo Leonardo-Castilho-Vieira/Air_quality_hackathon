@@ -15,7 +15,8 @@ source("http://www.sthda.com/upload/rquery_cormat.r")
 
 # DS_Air_Quality
 
-#Local onde estão os datasets 
+#Datasets baixados de https://archive.ics.uci.edu/ml/datasets/Beijing+Multi-Site+Air-Quality+Data
+#Local onde estão os datasets neste computador
 setwd("C:\\Users\\leona\\OneDrive\\Documentos\\R\\Hackathon\\PRSA2017_Data_20130301-20170228\\PRSA_Data_20130301-20170228")
 # getwd()
 
@@ -126,6 +127,6 @@ abline(molLin)
 
 fitted(molLin)
 resid(molLin)
-Periodo 
+
 segments(Periodo, fitted(molLin), 
          Periodo, Concetracao_PM10)
