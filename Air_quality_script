@@ -1,0 +1,131 @@
+# install.packages("corrplot")
+# install.packages("tidyr")
+# install.packages("devtools")
+# install.packages("dplyr")
+# install.packages("tibble")
+# install.packages("readr")
+
+library(devtools)
+library(tidyr)
+library(dplyr)
+library(tibble)
+library(readr)
+
+source("http://www.sthda.com/upload/rquery_cormat.r")
+
+# DS_Air_Quality
+
+#Local onde estão os datasets 
+setwd("C:\\Users\\leona\\OneDrive\\Documentos\\R\\Hackathon\\PRSA2017_Data_20130301-20170228\\PRSA_Data_20130301-20170228")
+# getwd()
+
+#Limpar variaveis da memória
+rm(list=ls())
+
+#Usando a biblioteca plyr
+library(plyr)
+
+#criando data frame único
+arquivos = dir()
+dfs = ldply(arquivos, read.csv)
+
+#Retirando biblioteca plyr
+library(dplyr)
+# detach("package:plyr", unload = TRUE)
+
+#PM2.5 por ano
+datePm2.5 = dfs %>%
+  select(year, PM2.5, station) %>%
+  group_by(year) %>%
+  summarise(ConcentracaoPM2.5=sum(PM2.5, na.rm = TRUE))
+
+dateStationPm2.5 = dfs %>%
+  select(year, PM2.5, station) %>%
+  group_by(year, station) %>%
+  summarise(ConcentracaoPM2.5=sum(PM2.5, na.rm = TRUE)) %>%
+  arrange(station)
+
+#Gerando Data Frames
+datePm10 = dfs %>%
+  select(year, PM10, station) %>%
+  group_by(year) %>%
+  summarise(ConcentracaoPM10=sum(PM10, na.rm = TRUE))
+
+dateStationPm10 = dfs %>%
+  select(year, PM10, station) %>%
+  group_by(year, station) %>%
+  summarise(ConcentracaoPM10=sum(PM10, na.rm = TRUE)) %>%
+  arrange(station)
+
+stationPm2.5 = dfs %>%
+  select(year, PM2.5, station) %>%
+  group_by(station) %>%
+  summarise(ConcentracaoPM2.5=sum(PM2.5, na.rm = TRUE)) %>%
+  arrange(ConcentracaoPM2.5)
+
+stationPm10 = dfs %>%
+  select(year, PM10, station) %>%
+  group_by(station) %>%
+  summarise(ConcentracaoPM10=sum(PM10, na.rm = TRUE)) %>%
+  arrange(ConcentracaoPM10)
+
+# Concentração de PM2.5 nas 12 estações x = Concentração y = Estações
+ggplot(stationPm2.5, 
+       aes(x=stationPm2.5$ConcentracaoPM2.5, 
+           y=stationPm2.5$station)) +
+  geom_bar(stat="identity") + 
+  labs(x="Concentração de PM2.5", y="Estações Meteriologicas")
+
+# Concentração de PM2.5 durante o período x = Período y = Concentração
+ggplot(datePm2.5, 
+       aes(x=datePm2.5$year, 
+           y=datePm2.5$ConcentracaoPM2.5)) + 
+  geom_bar(stat="identity") + 
+  labs(x="Período", y="Concentração de PM2.5")
+
+Periodo = datePm2.5$year
+Concetracao_PM2.5 = datePm2.5$ConcentracaoPM2.5
+
+#Modelo Linear
+molLin = lm(Concetracao_PM2.5~Periodo)
+
+plot(Periodo, Concetracao_PM2.5)
+
+abline(molLin)
+
+fitted(molLin)
+resid(molLin)
+
+segments(Periodo, fitted(molLin), 
+         Periodo, Concetracao_PM2.5)
+
+# Concentração de PM10 nas 12 estações x = Concentração y = Estações
+ggplot(stationPm10, 
+       aes(x=stationPm10$ConcentracaoPM10, 
+           y=stationPm10$station)) +
+  geom_bar(stat="identity") + 
+  labs(x="Concentração de PM10", y="Estações Meteriologicas")
+
+# Concentração de PM10 durante o período x = Período y = Concentração
+ggplot(datePm10, 
+       aes(x=datePm10$year, 
+           y=datePm10$ConcentracaoPM10)) + 
+  geom_bar(stat="identity") + 
+  labs(x="Período", y="Concentração de PM10")
+
+
+Periodo = datePm10$year
+Concetracao_PM10 = datePm10$ConcentracaoPM10
+
+#Modelo Linear
+molLin = lm(datePm10$ConcentracaoPM10~datePm10$year)
+
+plot(Periodo, Concetracao_PM10)
+
+abline(molLin)
+
+fitted(molLin)
+resid(molLin)
+Periodo 
+segments(Periodo, fitted(molLin), 
+         Periodo, Concetracao_PM10)
